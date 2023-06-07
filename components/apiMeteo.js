@@ -1,16 +1,15 @@
-import { StyleSheet, Text, View, Image } from 'react-native';
+import { Text, View, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import Geolocalisation from './location';
 
 const apiKey = '777e48a6b21219c45c998ad624516454';
 
-const Meteo = () => {
+const Meteo = ({latitude, longitude}) => {
     const [meteoData, setMeteoData] = useState();
     const [meteoIcon, setMeteoIcon] = useState();
 
     useEffect(() => {
         const fetchMeteoData = () => {
-            fetch(`http://api.openweathermap.org/data/2.5/weather?q=Lyon&appid=${apiKey}&lang=fr&units=metric`)
+            fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&lang=fr&units=metric`)
               .then(response => response.json())
               .then(data => { 
                 setMeteoData(data);
