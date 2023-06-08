@@ -3,6 +3,14 @@ import React, { useEffect, useState } from 'react';
 
 const apiKey = '777e48a6b21219c45c998ad624516454';
 
+const formatDate = (date) => {
+    const dateObj = new Date(date);
+    const day = dateObj.getDate().toString().padStart(2, '0');
+    const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+    const year = dateObj.getFullYear();
+    return day + '/' + month + '/' + year;
+};
+
 const Meteo = ({latitude, longitude}) => {
     const [meteoData, setMeteoData] = useState();
     const [meteoIcon, setMeteoIcon] = useState();
@@ -23,6 +31,10 @@ const Meteo = ({latitude, longitude}) => {
             fetch(`http://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${apiKey}&lang=fr&units=metric`)
               .then(response => response.json())
               .then(data => { 
+                const forecastMidi = data.list.filter((forecast, index) => {
+                    return forecast.dt_txt.includes("12:00:00") ;
+                });
+                data.list = forecastMidi;
                 setForecastData(data);
                 console.log(data);
                 })
@@ -35,28 +47,30 @@ const Meteo = ({latitude, longitude}) => {
 
     return (
         <View>
+            <Text style={styles.titre}>Météo</Text>
             {meteoData ? (
                 <View style={styles.meteo}>
-                    <Text>Vous êtes à {meteoData.name}</Text>
-                    <Text>{meteoData.main.temp} °C</Text>
+                    <Text style={styles.texte}>{meteoData.name}</Text>
+                    <Text style={styles.texte}>{meteoData.main.temp} °C</Text>
                     {meteoIcon ? 
-                        <Image source={{ uri: meteoIcon }} style={{ width: 50, height: 50 }} /> : null
+                        <Image source={{ uri: meteoIcon }} style={{ width: 70, height: 70 }} /> : null
                     }
-                    <Text>{meteoData.weather[0].description}</Text>
+                    <Text style={styles.texte}>{meteoData.weather[0].description}</Text>
                 </View>
             ) : (
                 <Text>Erreur Meteo</Text>
             )}
+            <Text style={styles.texte}>Prévisions sur 5J à 12h :</Text>
             {forecastData ? (
-                <ScrollView horizontal={true} style={styles.scroll} >
+                <ScrollView horizontal={true} style={styles.scroll}>
                     {forecastData.list.map((forecast, index) => (
-                        <View key={index} style={styles.card} > 
-                            <Text>{forecast.dt_txt}</Text>
-                            <Text>{forecast.main.temp} °C</Text>
+                        <View key={index} style={styles.card}> 
+                            <Text style={styles.texte}>{formatDate(forecast.dt_txt)}</Text>
+                            <Text style={styles.texte}>{forecast.main.temp} °C</Text>
                             {forecast.weather[0].icon ?
-                                <Image source={{ uri: `http://openweathermap.org/img/wn/${forecast.weather[0].icon}.png` }} style={{ width: 50, height: 50 }} /> : null
+                                <Image source={{ uri: `http://openweathermap.org/img/wn/${forecast.weather[0].icon}.png` }} style={{ width: 70, height: 70 }} /> : null
                             }
-                            <Text>{forecast.weather[0].description}</Text>
+                            <Text style={styles.texte}>{forecast.weather[0].description}</Text>
                         </View>
                     ))}
                 </ScrollView>
@@ -68,26 +82,37 @@ const Meteo = ({latitude, longitude}) => {
 };
 
 const styles = StyleSheet.create({
+    titre: {
+        textAlign: 'center',
+        fontWeight: 'bold',
+        fontSize: 30,
+        marginTop: 70,
+    },
+    texte: {
+        textAlign: 'center',
+        fontWeight: 'bold',
+        fontSize: 20,
+    },
     meteo: {
-        backgroundColor: 'white',
+        backgroundColor: '#67B7D1',
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 10,
-        width: 200,
-        height: 150,
-        margin: 100,
+        width: 300,
+        height: 200,
+        margin: 50,
     },
     scroll: {
-        marginLeft: 10,
+        marginLeft: 20,
     },
     card: {
-        backgroundColor: 'white',
+        backgroundColor: '#67B7D1',
         alignItems: 'center',
         justifyContent: 'center',
         width: 200,
-        height: 150,
-        margin: 10,
-        padding: 10,
+        height: 200,
+        margin: 5,
+        marginTop: 15,
         borderRadius: 10,
     },
 });
